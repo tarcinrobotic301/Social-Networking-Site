@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/css/bootstrap.min.css">
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/styles/styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Home</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/add-post">Add Post</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/profile">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+                <!-- Theme buttons -->
+                <button id="light-theme-btn" class="btn btn-light">Light</button>
+                <button id="dark-theme-btn" class="btn btn-dark">Dark</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Welcome <%= user.name %>!</h1>
+        <hr>
+        <% posts.forEach(post => { %>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p><strong>Posted by: <%= post.user.name %></strong></p>
+                    <h5 class="card-title">Incident:</h5>
+                    <p class="card-text"><%= post.incident %></p>
+                    <h5 class="card-title">Problem:</h5>
+                    <p class="card-text"><%= post.problem %></p>
+                    <p class="card-text">
+                        <i class="far fa-thumbs-up"></i> <%= post.likes.length %> Likes |
+                        <span class="comment-count" style="cursor: pointer; text-decoration: underline;"> 
+                            <i class="far fa-comments"></i> <%= post.comments.length %> Comments
+                        </span>
+                    </p>
+                    <div class="comments" style="display: none;">
+                        <% post.comments.forEach(comment => { %>
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <p><strong>Comment by: <%= comment.user.name %></strong></p>
+                                    <p><%= comment.text %></p>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                    <% if (user._id.toString() === post.user._id.toString()) { %>
+                        <form action="/delete-post/<%= post._id %>" method="POST">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    <% } %>
+                    <form action="/like/<%= post._id %>" method="POST">
+                        <button type="submit" class="btn btn-primary">Like</button>
+                    </form>
+                    <form action="/comment/<%= post._id %>" method="POST">
+                        <div class="mb-3">
+                            <textarea class="form-control" name="comment" rows="2" placeholder="Add a comment..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Comment</button>
+                    </form>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+
+    <script>
+        // Add event listener to comment count
+        document.querySelectorAll('.comment-count').forEach(commentCount => {
+            commentCount.addEventListener('click', () => {
+                // Toggle visibility of comments section
+                const commentsSection = commentCount.parentElement.querySelector('.comments');
+                commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+
+        // Function to toggle between light and dark themes
+        function toggleTheme(theme) {
+            const body = document.body;
+            if (theme === "light") {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+            } else if (theme === "dark") {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+            }
+        }
+
+        // Apply default theme on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            // Check for saved theme preference in local storage
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                toggleTheme(savedTheme);
+            }
+        });
+
+        // Theme buttons event listeners
+        document.getElementById('light-theme-btn').addEventListener('click', () => {
+            toggleTheme("light");
+            localStorage.setItem('theme', 'light');
+        });
+
+        document.getElementById('dark-theme-btn').addEventListener('click', () => {
+            toggleTheme("dark");
+            localStorage.setItem('theme', 'dark');
+        });
+    </script>
+</body>
+</html>
